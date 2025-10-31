@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+/* Register Degular Display font */
+@font-face {
+  font-family: "Degular Display";
+  src: url("/src/assets/fonts/DegularDisplay-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Degular Display";
+  src: url("/src/assets/fonts/DegularDisplay-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Degular Display";
+  src: url("/src/assets/fonts/NeueHaasUnica-Regular.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+html,
+body {
+  overflow-x: hidden;
+  font-family: 'Satoshi', sans-serif;
+
+}
+
