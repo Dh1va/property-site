@@ -1,70 +1,41 @@
+// src/pages/AdminLogin.jsx
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import api from "../api";
 
 const AdminLogin = () => {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     try {
-      const res = await axios.post("http://localhost:5000/api/admin/login", {
-        username,
-        password,
-      });
+      const res = await api.post("/api/admin/login", { username, password });
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("role", res.data.role || "admin");
+      localStorage.setItem("name", res.data.name || "");
       navigate("/admin/dashboard");
     } catch (err) {
-      setError("Invalid username or password");
+      setError(err.response?.data?.message || err.message || "Login failed");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white shadow-lg p-8 rounded-xl w-96 space-y-5"
-      >
-        <h2 className="text-2xl font-bold text-center">Admin Login</h2>
-
-        {error && (
-          <p className="text-red-600 text-center text-sm bg-red-100 p-2 rounded">
-            {error}
-          </p>
-        )}
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="border rounded-md w-full p-2"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="border rounded-md w-full p-2"
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="bg-black text-white w-full py-2 rounded-md hover:bg-gray-800 transition"
-        >
-          Login
-        </button>
-      </form>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-md p-6 bg-white rounded shadow">
+        <h2 className="text-xl font-semibold mb-4">Admin Login</h2>
+        {error && <div className="text-red-600 mb-2">{error}</div>}
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <input value={username} onChange={(e)=>setUsername(e.target.value)} placeholder="username" className="w-full p-2 border rounded" required/>
+          <input value={password} onChange={(e)=>setPassword(e.target.value)} type="password" placeholder="password" className="w-full p-2 border rounded" required/>
+          <div className="flex justify-end">
+            <button className="px-4 py-2 bg-black text-white rounded">Login</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

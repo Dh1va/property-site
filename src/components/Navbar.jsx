@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import Logo from "../assets/images/podab-01.png"; // adjust if your logo path differs
-import { slugify } from "../utils/slug"; // optional helper if you have it
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import Logo from "../assets/images/podab-01.png";
+import { slugify } from "../utils/slug";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [visible, setVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [loginPopup, setLoginPopup] = useState(false);
+
   const navigate = useNavigate();
+  const location = useLocation(); // <- used to close popup on route change
 
   const navLinks = [
     { name: "Buy", path: "/buy" },
@@ -29,7 +32,7 @@ const Navbar = () => {
     },
   ];
 
-  // 🧭 Scroll Hide Navbar
+  // Scroll Hide Navbar
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > lastScrollY && window.scrollY > 80) {
@@ -44,11 +47,32 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+  // CLOSE login popup whenever location changes (covers navigation/back/forward)
+  useEffect(() => {
+    setLoginPopup(false);
+    // also close mobile menu on navigation
+    setMobileOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
   const handleNavigate = (area) => {
     navigate(`/properties/${slugify(area)}`);
     setMobileOpen(false);
     setOpenDropdown(null);
+    setLoginPopup(false); // also close popup if open
   };
+
+  // Logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("name");
+    navigate("/");
+    setLoginPopup(false); // close popup if open
+  };
+
+  const isLoggedIn = !!localStorage.getItem("token");
+  const role = localStorage.getItem("role");
 
   return (
     <nav
@@ -110,14 +134,50 @@ const Navbar = () => {
           ))}
         </div>
 
-        {/* Right: Contact Button (Desktop) */}
-        <div className="hidden md:block">
-          <Link
-            to="/contact"
-            className="border border-black px-5 py-2 rounded-full font-bold uppercase hover:bg-black hover:text-white transition"
-          >
-            Contact
-          </Link>
+        {/* Right: Login / Logout */}
+        <div className="hidden md:flex items-center gap-3 relative">
+          {!isLoggedIn ? (
+            <>
+              <button
+                onClick={() => setLoginPopup((s) => !s)}
+                className="border border-black px-5 py-2 rounded-full font-bold uppercase hover:bg-black hover:text-white transition"
+              >
+                Login
+              </button>
+
+              {/* Login Popup */}
+              {loginPopup && (
+                <div className="absolute right-6 top-full mt-3 bg-white border shadow-lg rounded-lg p-4 w-48 z-50">
+                  {/* Close popup then navigate */}
+                  <button
+                    onClick={() => {
+                      setLoginPopup(false);
+                      navigate("/admin/login");
+                    }}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded"
+                  >
+                    Admin Login
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLoginPopup(false);
+                      navigate("/seller/login");
+                    }}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded"
+                  >
+                    Seller Login
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="border border-red-500 text-red-600 px-4 py-2 rounded-full font-bold uppercase hover:bg-red-500 hover:text-white transition"
+            >
+              Logout
+            </button>
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -152,6 +212,7 @@ const Navbar = () => {
                     />
                   </button>
 
+                  {/* Mobile dropdown */}
                   {openDropdown === link.name && (
                     <div className="mt-2 pl-3 space-y-2">
                       {link.submenu.map((sub, j) => (
@@ -178,14 +239,52 @@ const Navbar = () => {
             </div>
           ))}
 
-          {/* Contact Button (Mobile) */}
-          <Link
-            to="/contact"
-            onClick={() => setMobileOpen(false)}
-            className="block text-left border border-black py-2 px-4 rounded-full font-bold uppercase text-sm hover:bg-black hover:text-white transition mt-4 w-fit  "
-          >
-            Contact
-          </Link>
+          {/* Login Button - Mobile */}
+          {!isLoggedIn ? (
+            <>
+              <button
+                onClick={() => setLoginPopup((s) => !s)}
+                className="block text-left border border-black py-2 px-4 rounded-full font-bold uppercase text-sm hover:bg-black hover:text-white transition mt-4"
+              >
+                Login
+              </button>
+
+              {loginPopup && (
+                <div className="mt-2 pl-2 space-y-2">
+                  <button
+                    onClick={() => {
+                      setLoginPopup(false);
+                      setMobileOpen(false); // close mobile menu
+                      navigate("/admin/login");
+                    }}
+                    className="block w-full text-left text-gray-700 hover:text-black"
+                  >
+                    Admin Login
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLoginPopup(false);
+                      setMobileOpen(false);
+                      navigate("/seller/login");
+                    }}
+                    className="block w-full text-left text-gray-700 hover:text-black"
+                  >
+                    Seller Login
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <button
+              onClick={() => {
+                handleLogout();
+                setMobileOpen(false);
+              }}
+              className="block text-left border border-red-600 py-2 px-4 rounded-full font-bold uppercase text-sm text-red-600 hover:bg-red-600 hover:text-white transition mt-4"
+            >
+              Logout
+            </button>
+          )}
         </div>
       )}
     </nav>

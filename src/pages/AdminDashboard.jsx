@@ -1,78 +1,53 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+// src/pages/AdminDashboard.jsx
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import AdminPropertyTable from "../components/AdminPropertyTable";
-import PropertyForm from "../components/PropertyForm";
 
 const AdminDashboard = () => {
-  const [properties, setProperties] = useState([]);
-  const [editingProperty, setEditingProperty] = useState(null);
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("token");
-  if (!token) navigate("/admin/login");
+  const handleLogout = () => {
+    // Remove saved auth data
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("name");
 
-  // Fetch properties
-  const fetchProperties = async () => {
-    const res = await axios.get("http://localhost:5000/api/properties");
-    setProperties(res.data);
-  };
-
-  useEffect(() => {
-    fetchProperties();
-  }, []);
-
-  // Delete
-  const handleDelete = async (id) => {
-    await axios.delete(`http://localhost:5000/api/properties/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    fetchProperties();
-  };
-
-  // Add or Update
-  const handleSave = async (formData) => {
-    if (editingProperty) {
-      await axios.put(
-        `http://localhost:5000/api/properties/${editingProperty._id}`,
-        formData,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    } else {
-      await axios.post("http://localhost:5000/api/properties", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-    }
-    fetchProperties();
-    setEditingProperty(null);
+    // Redirect to login page
+    navigate("/admin/login");
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-[100px] p-8">
+    <div className="p-8 mt-10">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+
+        {/* Logout Button */}
         <button
-          onClick={() => {
-            localStorage.removeItem("token");
-            navigate("/admin/login");
-          }}
-          className="bg-red-500 text-white px-4 py-2 rounded-md"
+          onClick={handleLogout}
+          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
         >
           Logout
         </button>
       </div>
 
-      <PropertyForm
-        onSave={handleSave}
-        editingProperty={editingProperty}
-        cancelEdit={() => setEditingProperty(null)}
-      />
+      <p className="mb-6">
+        This is a placeholder dashboard. Replace with your real admin UI.
+      </p>
 
-      <AdminPropertyTable
-        properties={properties}
-        onEdit={setEditingProperty}
-        onDelete={handleDelete}
-      />
+      <div className="flex gap-3">
+        <button
+          onClick={() => navigate("/admin/add")}
+          className="px-3 py-2 bg-black text-white rounded"
+        >
+          Add Property
+        </button>
+
+        <button
+          onClick={() => navigate("/admin/sellers")}
+          className="px-3 py-2 bg-gray-200 rounded"
+        >
+          Manage Sellers
+        </button>
+      </div>
     </div>
   );
 };

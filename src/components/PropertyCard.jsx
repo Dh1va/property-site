@@ -50,7 +50,7 @@ const PropertyCard = ({ property }) => {
           {/* Price */}
           <div className="pt-2 border-t">
             <p className="font-semibold text-lg text-black">
-              CHF {property.price.toLocaleString()}
+              INR {property.price.toLocaleString()}
             </p>
           </div>
         </div>
