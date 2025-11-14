@@ -302,7 +302,7 @@ const PropertyDetails = () => {
                         {p.city}, {p.country}
                       </p>
                       <p className="text-gray-800 font-semibold mb-3">
-                        INR {p.price.toLocaleString()}
+                        CHF {p.price.toLocaleString()}
                       </p>
                     </div>
 
