@@ -1,5 +1,6 @@
 import React from "react";
-import EnquiryForm from "../components/EnquiryForm";
+
+import EnquiryFormSimple from "../components/EnquiryFormSimple";
 
 const Contact = () => {
   return (
@@ -11,7 +12,7 @@ const Contact = () => {
 
         {/* Only the Form */}
         <div className="bg-[#EDEAE3] rounded-2xl p-8 shadow-lg">
-          <EnquiryForm />
+          <EnquiryFormSimple />
         </div>
       </div>
     </section>

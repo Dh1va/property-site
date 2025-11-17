@@ -1,5 +1,5 @@
 import React from 'react'
-import EnquiryForm from './EnquiryForm'
+import EnquiryFormSimple from './EnquiryFormSimple'
 
 const Enquiry = () => {
   return (
@@ -20,7 +20,7 @@ const Enquiry = () => {
 
         {/* Right Form */}
         <div className="w-full md:w-1/2 space-y-6 text-left md:text-left flex flex-col justify-start md:px-3">
-          <EnquiryForm />
+          <EnquiryFormSimple />
         </div>
       </section>
     </div>

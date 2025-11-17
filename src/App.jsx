@@ -1,122 +1,109 @@
 // src/App.jsx
-import "./App.css";
-import { Route, Routes, Navigate } from "react-router-dom";
+import React from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
 
+/* Public pages */
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
-
-// Public pages
 import Buy from "./pages/Buy";
 import Contact from "./pages/Contact";
 import PropertyDetails from "./pages/PropertyDetails";
 import PropertyListPage from "./pages/PropertyListPage";
 
-// Auth pages
-import AdminLogin from "./pages/AdminLogin";
-import SellerAuth from "./pages/SellerAuth";
+/* Auth & protection */
+import ProtectedRoute from "./components/ProtectedRoute";
 
-// Protected pages
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminAddProperty from "./pages/AdminAddProperty";
-import AdminSellers from "./pages/AdminSellers";
+/* Admin area (nested) */
+import AdminLogin from "./admin/AdminLogin";
+import AdminLayout from "./admin/AdminLayout";
+import AdminHome from "./admin/AdminHome";
+import ManageSellers from "./admin/ManageSellers";
+import ManageProperties from "./admin/ManageProperties";
+// import AdminEnquiries from "./admin/AdminEnquiries"; // create this when ready
 
-import SellerDashboard from "./pages/SellerDashboard";
+/* Seller area (nested) */
+import SellerLogin from "./seller/SellerLogin";
+import SellerLayout from "./seller/SellerLayout";
+import SellerDashboard from "./seller/SellerDashboard";
+import MyProperties from "./seller/MyProperties";
 
-// 🔐 Auth guard to protect routes
-const RequireAuth = ({ allowedRole, children }) => {
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
+/* Shared property form (create + edit) */
+import SharedPropertyForm from "./shared/PropertyForm";
+import AdminEnquiries from "./admin/AdminEnquires";
 
-  // No token → not logged in
-  if (!token) return <Navigate to={`/${allowedRole}/login`} replace />;
+/* 404 */
+const NotFound = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="text-center">
+      <h1 className="text-3xl font-bold mb-4">404 — Page Not Found</h1>
+      <p className="text-gray-600">The page you requested does not exist.</p>
+    </div>
+  </div>
+);
 
-  // Wrong role → redirect to correct login
-  if (role !== allowedRole)
-    return <Navigate to={`/${allowedRole}/login`} replace />;
+/* Helper: hide public shell for admin/seller routes */
+function isAdminOrSellerPath(pathname) {
+  if (!pathname) return false;
+  const p = pathname.toLowerCase();
+  return p === "/admin" || p.startsWith("/admin/") || p === "/seller" || p.startsWith("/seller/");
+}
 
-  return children;
-};
+export default function AppWrapper() {
+  const { pathname } = useLocation();
+  const hidePublicShell = isAdminOrSellerPath(pathname);
 
-function App() {
   return (
     <>
       <ScrollToTop />
-      <Navbar />
+      {!hidePublicShell && <Navbar />}
 
       <Routes>
-        {/* ========= PUBLIC ROUTES ========= */}
+        {/* Public */}
         <Route path="/" element={<Buy />} />
         <Route path="/buy" element={<Buy />} />
         <Route path="/property/:id" element={<PropertyDetails />} />
         <Route path="/properties/:category" element={<PropertyListPage />} />
         <Route path="/contact" element={<Contact />} />
 
-        {/* ========= AUTH ROUTES ========= */}
+        {/* Admin nested */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/seller/login" element={<SellerAuth />} />
-
-        {/* ========= ADMIN PROTECTED ROUTES ========= */}
         <Route
-          path="/admin/dashboard"
+          path="/admin/*"
           element={
-            <RequireAuth allowedRole="admin">
-              <AdminDashboard />
-            </RequireAuth>
+            <ProtectedRoute role="admin">
+              <AdminLayout />
+            </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<AdminHome />} />
+          <Route path="sellers" element={<ManageSellers />} />
+          <Route path="properties" element={<ManageProperties />} />
+          <Route path="properties/new" element={<SharedPropertyForm redirectTo="/admin/properties" />} />
+          <Route path="properties/:id" element={<SharedPropertyForm redirectTo="/admin/properties" />} />
+          <Route path="enquiries" element={<AdminEnquiries />} />
+        </Route>
 
+        {/* Seller nested */}
+        <Route path="/seller/login" element={<SellerLogin />} />
         <Route
-          path="/admin/add"
+          path="/seller/*"
           element={
-            <RequireAuth allowedRole="admin">
-              <AdminAddProperty />
-            </RequireAuth>
+            <ProtectedRoute role="seller">
+              <SellerLayout />
+            </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<SellerDashboard />} />
+          <Route path="properties" element={<MyProperties />} />
+          <Route path="properties/new" element={<SharedPropertyForm redirectTo="/seller/properties" />} />
+          <Route path="properties/:id" element={<SharedPropertyForm redirectTo="/seller/properties" />} />
+        </Route>
 
-        <Route
-          path="/admin/sellers"
-          element={
-            <RequireAuth allowedRole="admin">
-              <AdminSellers />
-            </RequireAuth>
-          }
-        />
-
-        {/* Shortcut: /admin → /admin/dashboard */}
-        <Route path="/admin" element={<Navigate to="/admin/dashboard" />} />
-
-        {/* ========= SELLER PROTECTED ROUTES ========= */}
-        <Route
-          path="/seller"
-          element={
-            <RequireAuth allowedRole="seller">
-              <SellerDashboard />
-            </RequireAuth>
-          }
-        />
-
-        {/* Shortcut: /seller/dashboard → /seller */}
-        <Route
-          path="/seller/dashboard"
-          element={<Navigate to="/seller" replace />}
-        />
-
-        {/* ========= 404 ========= */}
-        <Route
-          path="*"
-          element={
-            <div className="p-8 text-center text-lg text-gray-600">
-              404 — Page Not Found
-            </div>
-          }
-        />
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
-      <Footer />
+      {!hidePublicShell && <Footer />}
     </>
   );
 }
-
-export default App;
