@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import EnquiryFormPanel from "../components/EnquiryFormPanel";
+
+
+
 import axios from "axios";
 import properties from "../data/properties";
 import Bank1 from "../assets/images/Bank logo-01.png";
@@ -46,30 +50,7 @@ const PropertyDetails = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setStatus("Sending...");
 
-    try {
-      const payload = {
-        refNumber: property.refNumber || "N/A",
-        propertyTitle: property.title || "N/A",
-        ...formData,
-      };
-
-      const res = await axios.post("http://localhost:5000/api/enquiry", payload);
-
-      if (res.data.success) {
-        setStatus("✅ Inquiry sent successfully!");
-        setFormData({ name: "", email: "", phone: "", message: "" });
-      } else {
-        setStatus("❌ Failed to send inquiry");
-      }
-    } catch (error) {
-      console.error(error);
-      setStatus("❌ Error sending inquiry");
-    }
-  };
 
   return (
     <div className="relative">
@@ -185,7 +166,7 @@ const PropertyDetails = () => {
                 Share your details and our property expert will get in touch soon.
               </p>
 
-              <form
+              {/* <form
                 onSubmit={handleSubmit}
                 className="flex flex-col gap-6 lg:sticky lg:top-28 h-fit"
               >
@@ -250,7 +231,8 @@ const PropertyDetails = () => {
                 {status && (
                   <p className="text-sm text-gray-300 mt-2 text-center">{status}</p>
                 )}
-              </form>
+              </form> */}
+              <EnquiryFormPanel propertyTitle={property.title} propertyRef={property.refNumber} />
             </div>
           </div>
         </div>
