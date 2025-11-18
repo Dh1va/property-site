@@ -43,7 +43,7 @@ export default function ManageSellers() {
               <span className={`text-sm ${s.isActive ? "text-green-600" : "text-red-600"}`}>
                 {s.isActive ? "Active" : "Inactive"}
               </span>
-              <button onClick={() => toggle(s._id, !s.isActive)} className="px-3 py-1 border rounded">
+              <button onClick={() => toggle(s._id, !s.isActive)} className="px-3 py-1 border rounded cursor-pointer">
                 {s.isActive ? "Deactivate" : "Activate"}
               </button>
             </div>

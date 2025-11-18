@@ -39,7 +39,7 @@ export default function AdminLayout() {
         {/* Desktop header absolute top-right (hidden on mobile) */}
         <header className="hidden md:flex items-center justify-end gap-4 px-6 py-3 absolute top-0 right-0 z-20">
           <span className="text-sm text-gray-700">Signed in as <strong>{user?.name}</strong></span>
-          <button onClick={logout} className="px-3 py-1 rounded text-sm border">Logout</button>
+          <button onClick={logout} className="px-3 py-1 rounded text-sm border cursor-pointer">Logout</button>
         </header>
 
         {/* Spacer to account for fixed mobile topbar height */}

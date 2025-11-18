@@ -43,7 +43,7 @@ export default function ManageProperties() {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">All Properties</h2>
         <div>
-          <button onClick={() => navigate("/admin/properties/new")} className="px-4 py-2 bg-black text-white rounded">
+          <button onClick={() => navigate("/admin/properties/new")} className="px-4 py-2 bg-black text-white rounded cursor-pointer">
             Add Property
           </button>
         </div>
@@ -62,8 +62,8 @@ export default function ManageProperties() {
               </div>
 
               <div className="mt-4 flex gap-2">
-                <button onClick={() => navigate(`/admin/properties/${id}`)} className="px-3 py-1 border rounded">Edit</button>
-                <button onClick={() => doDelete(id)} className="px-3 py-1 border rounded text-red-600">Delete</button>
+                <button onClick={() => navigate(`/admin/properties/${id}`)} className="px-3 py-1 border rounded cursor-pointer">Edit</button>
+                <button onClick={() => doDelete(id)} className="px-3 py-1 border rounded text-red-600 cursor-pointer">Delete</button>
               </div>
             </div>
           );

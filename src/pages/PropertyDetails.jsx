@@ -1,8 +1,7 @@
+// src/pages/PropertyDetails.jsx
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import EnquiryFormPanel from "../components/EnquiryFormPanel";
-
-
 
 import axios from "axios";
 import properties from "../data/properties";
@@ -40,17 +39,13 @@ const PropertyDetails = () => {
   const [status, setStatus] = useState("");
 
   if (!property) {
-    return (
-      <p className="text-center mt-20 text-gray-500">Property not found.</p>
-    );
+    return <p className="text-center mt-20 text-gray-500">Property not found.</p>;
   }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
-
 
   return (
     <div className="relative">
@@ -65,7 +60,8 @@ const PropertyDetails = () => {
         <ArrowLeft className="w-6 h-6" />
       </button>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-12 lg:px-24 xl:px-32 py-12">
+      {/* NOTE: changed px-* to px-6 to match Navbar's horizontal padding */}
+      <div className="max-w-7xl mx-auto px-6 py-12">
         {/* 🖼️ Main Image */}
         <img
           src={mainImage}
@@ -107,20 +103,14 @@ const PropertyDetails = () => {
                 <Bed className="w-5 h-5 text-gray-800" /> {property.rooms} Rooms
               </div>
               <div className="flex items-center gap-2">
-                <Bath className="w-5 h-5 text-gray-800" />{" "}
-                {property.bathrooms || 2} Baths
+                <Bath className="w-5 h-5 text-gray-800" /> {property.bathrooms || 2} Baths
               </div>
             </div>
 
-            <p className="text-lg text-gray-700 leading-relaxed mb-8">
-              {property.description}
-            </p>
+            <p className="text-lg text-gray-700 leading-relaxed mb-8">{property.description}</p>
 
             <div className="text-2xl font-semibold mb-6">
-              Price:{" "}
-              <span className="text-black">
-                CHF {property.price.toLocaleString()}
-              </span>
+              Price: <span className="text-black">CHF {property.price.toLocaleString()}</span>
             </div>
 
             {/* 🏦 Bank Loan Info */}
@@ -128,12 +118,8 @@ const PropertyDetails = () => {
               <div className="flex items-center gap-3 mb-4">
                 <Landmark className="w-7 h-7 text-black" />
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    All Major Banks Loan Available
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    Get easy financing options through top banks.
-                  </p>
+                  <h3 className="text-lg font-semibold text-gray-900">All Major Banks Loan Available</h3>
+                  <p className="text-gray-600 text-sm">Get easy financing options through top banks.</p>
                 </div>
               </div>
 
@@ -146,9 +132,7 @@ const PropertyDetails = () => {
                     className="h-12 w-auto object-contain opacity-90 hover:opacity-100 transition duration-200"
                   />
                 ))}
-                <span className="text-gray-700 text-sm font-medium italic">
-                  and many more leading banks...
-                </span>
+                <span className="text-gray-700 text-sm font-medium italic">and many more leading banks...</span>
               </div>
             </div>
           </div>
@@ -158,80 +142,10 @@ const PropertyDetails = () => {
             <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-8 rounded-2xl shadow-lg">
               <div className="flex items-center gap-3 mb-4">
                 <MessageSquare className="w-16 h-16 text-white" />
-                <h2 className="text-2xl font-semibold">
-                  Interested in this property?
-                </h2>
+                <h2 className="text-2xl font-semibold">Interested in this property?</h2>
               </div>
-              <p className="text-gray-300 text-sm mb-6">
-                Share your details and our property expert will get in touch soon.
-              </p>
+              <p className="text-gray-300 text-sm mb-6">Share your details and our property expert will get in touch soon.</p>
 
-              {/* <form
-                onSubmit={handleSubmit}
-                className="flex flex-col gap-6 lg:sticky lg:top-28 h-fit"
-              >
-                <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2 focus-within:ring-2 ring-white/30">
-                  <User className="w-5 h-5 text-gray-300" />
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Your Name"
-                    required
-                    className="w-full bg-transparent outline-none text-sm text-white placeholder-gray-400"
-                  />
-                </div>
-
-                <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2 focus-within:ring-2 ring-white/30">
-                  <Phone className="w-5 h-5 text-gray-300" />
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="Phone Number"
-                    required
-                    className="w-full bg-transparent outline-none text-sm text-white placeholder-gray-400"
-                  />
-                </div>
-
-                <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2 focus-within:ring-2 ring-white/30">
-                  <Mail className="w-5 h-5 text-gray-300" />
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Email Address"
-                    required
-                    className="w-full bg-transparent outline-none text-sm text-white placeholder-gray-400"
-                  />
-                </div>
-
-                <div className="flex items-start gap-2 bg-white/10 rounded-lg px-3 py-2 focus-within:ring-2 ring-white/30">
-                  <MessageSquare className="w-5 h-5 text-gray-300 mt-1" />
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    placeholder="Message"
-                    rows={3}
-                    className="w-full bg-transparent outline-none text-sm text-white placeholder-gray-400 resize-none"
-                  ></textarea>
-                </div>
-
-                <button
-                  type="submit"
-                  className="cursor-pointer w-full bg-white text-black font-semibold py-2 rounded-lg hover:bg-gray-200 transition"
-                >
-                  Send Inquiry
-                </button>
-
-                {status && (
-                  <p className="text-sm text-gray-300 mt-2 text-center">{status}</p>
-                )}
-              </form> */}
               <EnquiryFormPanel propertyTitle={property.title} propertyRef={property.refNumber} />
             </div>
           </div>
@@ -240,52 +154,26 @@ const PropertyDetails = () => {
         {/* 🏘️ Related Properties */}
         <div className="mt-20">
           <h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6 text-black"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M2.25 12l8.954-8.955c.44-.44 1.152-.44 1.591 0L21.75 12M4.5 9.75v10.125a.375.375 0 00.375.375h4.875v-4.125a.375.375 0 01.375-.375h4.5a.375.375 0 01.375.375v4.125h4.875a.375.375 0 00.375-.375V9.75"
-              />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-black">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.44 1.152-.44 1.591 0L21.75 12M4.5 9.75v10.125a.375.375 0 00.375.375h4.875v-4.125a.375.375 0 01.375-.375h4.5a.375.375 0 01.375.375v4.125h4.875a.375.375 0 00.375-.375V9.75" />
             </svg>
             You May Also Like
           </h3>
 
-          <p className="text-gray-600 mb-8">
-            Explore more beautiful properties similar to this one.
-          </p>
+          <p className="text-gray-600 mb-8">Explore more beautiful properties similar to this one.</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {properties
               .filter((p) => p.id !== property.id)
               .slice(0, 3)
               .map((p) => (
-                <div
-                  key={p.id}
-                  className="bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition flex flex-col h-full"
-                >
-                  <img
-                    src={p.images[0]}
-                    alt={p.title}
-                    className="w-full h-48 object-cover"
-                  />
+                <div key={p.id} className="bg-gray-50 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition flex flex-col h-full">
+                  <img src={p.images[0]} alt={p.title} className="w-full h-48 object-cover" />
                   <div className="p-4 flex flex-col justify-between flex-grow">
                     <div>
-                      <h4 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2 min-h-[3rem]">
-                        {p.title}
-                      </h4>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {p.city}, {p.country}
-                      </p>
-                      <p className="text-gray-800 font-semibold mb-3">
-                        CHF {p.price.toLocaleString()}
-                      </p>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2 min-h-[3rem]">{p.title}</h4>
+                      <p className="text-sm text-gray-600 mb-2">{p.city}, {p.country}</p>
+                      <p className="text-gray-800 font-semibold mb-3">CHF {p.price.toLocaleString()}</p>
                     </div>
 
                     <button

@@ -13,7 +13,7 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "Buy", path: "/buy" },
-    { name: "Sell", path: "/sell" },
+    { name: "Sell", path: "/seller/login" },
     { name: "Estimate", path: "/estimate" },
     {
       name: "Properties",

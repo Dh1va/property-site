@@ -31,6 +31,7 @@ import MyProperties from "./seller/MyProperties";
 /* Shared property form (create + edit) */
 import SharedPropertyForm from "./shared/PropertyForm";
 import AdminEnquiries from "./admin/AdminEnquires";
+import SellerRegister from "./seller/SellerRegister";
 
 /* 404 */
 const NotFound = () => (
@@ -86,6 +87,8 @@ export default function AppWrapper() {
 
         {/* Seller nested */}
         <Route path="/seller/login" element={<SellerLogin />} />
+        <Route path="/seller/register" element={<SellerRegister />} />
+
         <Route
           path="/seller/*"
           element={

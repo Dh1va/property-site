@@ -33,7 +33,7 @@ export default function SellerLayout() {
         {/* Desktop absolute header */}
         <header className="hidden md:flex items-center justify-end gap-4 px-6 py-3 absolute top-0 right-0 z-20">
           <span className="text-sm text-gray-700 hidden sm:inline">Signed in as <strong>{user?.name}</strong></span>
-          <button onClick={logout} className="px-3 py-1 rounded hidden sm:inline">Logout</button>
+          <button onClick={logout} className="px-3 py-1 rounded hidden sm:inline border cursor-pointer">Logout</button>
         </header>
 
         <div className="md:hidden h-14" />
