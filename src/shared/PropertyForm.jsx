@@ -220,6 +220,8 @@ export default function PropertyForm({ redirectTo = "/admin/properties" }) {
     setServerError("");
     setClientError("");
 
+    
+
     const vMsg = validateBeforeSubmit();
     if (vMsg) {
       setClientError(vMsg);
