@@ -1,10 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
+import API from "../services/api";
 
 const amenitiesList = [
-  "Mountain view", "Lake view", "Pool", "Available for foreigners",
-  "Balcony", "Stores", "Terrace", "Kindergarten",
-  "Public Transit", "Elevator", "Parking", "Garage",
+   "Garden",
+  "Pool",
+  "Balcony",
+  "Terrace",
+  "Public Transit",
+  "Elevator",
+  "Parking",
+  "Garage",
+];
+
+// Keep these in sync with your category types / backend property types
+const PROPERTY_TYPES = [
+  "Agriland",
+  "Apartment",
+  "Commercial Building",
+  "Commercial Land",
+  "Houseplot",
+  "Land",
+  "Office",
+  "Residential",
+  "Retail",
+  "Villa",
 ];
 
 const FilterForm = ({ onFilter }) => {
@@ -24,6 +44,11 @@ const FilterForm = ({ onFilter }) => {
   const [filters, setFilters] = useState(initialFilters);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+  // 🔍 locations (city + pincode) suggestions from backend
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const debounceRef = useRef(null);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onFilter(filters);
@@ -40,7 +65,52 @@ const FilterForm = ({ onFilter }) => {
 
   const handleErase = () => {
     setFilters(initialFilters);
-    onFilter(initialFilters); // also reset property list in parent
+    setLocationSuggestions([]);
+    onFilter(initialFilters);
+  };
+
+  // 🔁 Fetch locations (city + pincode) from backend with debounce
+  const fetchLocations = (value) => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed || trimmed.length < 1) {
+      setLocationSuggestions([]);
+      setLocationLoading(false);
+      return;
+    }
+
+    debounceRef.current = setTimeout(async () => {
+      try {
+        setLocationLoading(true);
+        const res = await API.get("/locations", {
+          params: { search: trimmed },
+        });
+        setLocationSuggestions(res.data || []);
+      } catch (err) {
+        console.error("Location fetch failed", err);
+        setLocationSuggestions([]);
+      } finally {
+        setLocationLoading(false);
+      }
+    }, 300);
+  };
+
+  const handleCityChange = (e) => {
+    const value = e.target.value;
+    setFilters((prev) => ({ ...prev, city: value }));
+    fetchLocations(value);
+  };
+
+  const handleLocationSelect = (item) => {
+    // 👈 display ONLY the city name in the field
+    setFilters((prev) => ({
+      ...prev,
+      city: item.city || "",
+    }));
+    setLocationSuggestions([]);
   };
 
   return (
@@ -50,32 +120,80 @@ const FilterForm = ({ onFilter }) => {
     >
       {/* 🏙️ Row 1 — Place & Type */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="flex flex-col">
-          <label className="text-sm font-medium text-gray-600 mb-1">Place</label>
+        {/* Place with city + pincode autosuggest */}
+        <div className="flex flex-col relative">
+          <label className="text-sm font-medium text-gray-600 mb-1">
+            Place
+          </label>
           <input
             type="text"
             placeholder="Enter city or postal code"
             value={filters.city}
-            onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+            onChange={handleCityChange}
             className="border rounded-md p-2 w-full"
+            autoComplete="off"
           />
+
+          {/* Suggestions dropdown */}
+          {filters.city && (
+            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-md max-h-60 overflow-y-auto z-50">
+              {/* Loading state */}
+              {locationLoading && (
+                <div className="px-3 py-2 text-gray-500 text-sm">
+                  Searching…
+                </div>
+              )}
+
+              {/* Results */}
+              {!locationLoading && locationSuggestions.length > 0 && (
+                <>
+                  {locationSuggestions.map((item, idx) => {
+                    const hasPostal = !!item.postalCode;
+                    const label = hasPostal
+                      ? `${item.postalCode} – ${item.city}`
+                      : item.city || "";
+
+                    return (
+                      <div
+                        key={`${item.postalCode}-${item.city}-${idx}`}
+                        onClick={() => handleLocationSelect(item)}
+                        className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm"
+                      >
+                        {label}
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+
+              {/* No results */}
+              {!locationLoading && locationSuggestions.length === 0 && (
+                <div className="px-3 py-2 text-gray-500 text-sm">
+                  No suggestions found
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
+        {/* Type of Property */}
         <div className="flex flex-col">
           <label className="text-sm font-medium text-gray-600 mb-1">
             Type of Property
           </label>
           <select
             value={filters.type}
-            onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, type: e.target.value }))
+            }
             className="border rounded-md p-2 w-full"
           >
             <option value="">All Types</option>
-            <option value="Villa">Villa</option>
-            <option value="Apartment">Apartment</option>
-            <option value="Land">Land</option>
-            <option value="Commercial Building">Commercial Building</option>
-            
+            {PROPERTY_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -93,7 +211,10 @@ const FilterForm = ({ onFilter }) => {
               placeholder="Min"
               value={filters.minBudget}
               onChange={(e) =>
-                setFilters({ ...filters, minBudget: e.target.value })
+                setFilters((prev) => ({
+                  ...prev,
+                  minBudget: e.target.value,
+                }))
               }
               className="border rounded-md p-2 w-full"
             />
@@ -102,7 +223,10 @@ const FilterForm = ({ onFilter }) => {
               placeholder="Max"
               value={filters.maxBudget}
               onChange={(e) =>
-                setFilters({ ...filters, maxBudget: e.target.value })
+                setFilters((prev) => ({
+                  ...prev,
+                  maxBudget: e.target.value,
+                }))
               }
               className="border rounded-md p-2 w-full"
             />
@@ -120,7 +244,10 @@ const FilterForm = ({ onFilter }) => {
               placeholder="Min"
               value={filters.minSqm}
               onChange={(e) =>
-                setFilters({ ...filters, minSqm: e.target.value })
+                setFilters((prev) => ({
+                  ...prev,
+                  minSqm: e.target.value,
+                }))
               }
               className="border rounded-md p-2 w-full"
             />
@@ -129,7 +256,10 @@ const FilterForm = ({ onFilter }) => {
               placeholder="Max"
               value={filters.maxSqm}
               onChange={(e) =>
-                setFilters({ ...filters, maxSqm: e.target.value })
+                setFilters((prev) => ({
+                  ...prev,
+                  maxSqm: e.target.value,
+                }))
               }
               className="border rounded-md p-2 w-full"
             />
@@ -147,7 +277,10 @@ const FilterForm = ({ onFilter }) => {
               placeholder="Min"
               value={filters.minRooms}
               onChange={(e) =>
-                setFilters({ ...filters, minRooms: e.target.value })
+                setFilters((prev) => ({
+                  ...prev,
+                  minRooms: e.target.value,
+                }))
               }
               className="border rounded-md p-2 w-full"
             />
@@ -156,7 +289,10 @@ const FilterForm = ({ onFilter }) => {
               placeholder="Max"
               value={filters.maxRooms}
               onChange={(e) =>
-                setFilters({ ...filters, maxRooms: e.target.value })
+                setFilters((prev) => ({
+                  ...prev,
+                  maxRooms: e.target.value,
+                }))
               }
               className="border rounded-md p-2 w-full"
             />
@@ -171,7 +307,10 @@ const FilterForm = ({ onFilter }) => {
             type="checkbox"
             checked={filters.newItem}
             onChange={(e) =>
-              setFilters({ ...filters, newItem: e.target.checked })
+              setFilters((prev) => ({
+                ...prev,
+                newItem: e.target.checked,
+              }))
             }
           />
           New Item
@@ -186,11 +325,11 @@ const FilterForm = ({ onFilter }) => {
         </button>
       </div>
 
-      {/* ⚙️ Advanced Search + Erase (always visible) */}
+      {/* ⚙️ Advanced Search + Erase */}
       <div className="flex justify-between items-center mt-2">
         <button
           type="button"
-          onClick={() => setShowAdvanced(!showAdvanced)}
+          onClick={() => setShowAdvanced((prev) => !prev)}
           className="text-sm flex items-center gap-2 text-gray-700 hover:text-black"
         >
           <SlidersHorizontal className="w-4 h-4" />

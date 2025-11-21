@@ -2,7 +2,11 @@
 import React, { useState } from "react";
 import API from "../services/api";
 
-export default function EnquiryFormSimple({ propertyTitle = "", propertyRef = "" }) {
+export default function EnquiryFormSimple({
+  propertyTitle = "",
+  propertyId = "",
+  propertyRef = "",
+}) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -38,15 +42,21 @@ export default function EnquiryFormSimple({ propertyTitle = "", propertyRef = ""
       const payload = {
         ...formData,
         propertyTitle: propertyTitle || undefined,
+        propertyId: propertyId || undefined,
         propertyRef: propertyRef || undefined,
       };
 
-      // Use your API helper (baseURL should be set to /api or VITE_API_URL)
       const res = await API.post("/enquiry", payload);
 
       if (res?.data?.success) {
         alert("Your enquiry has been sent successfully!");
-        setFormData({ name: "", email: "", wish: "", meeting: "", message: "" });
+        setFormData({
+          name: "",
+          email: "",
+          wish: "",
+          meeting: "",
+          message: "",
+        });
         setErrors({});
         setStatus(`Sent — ref ${res.data.refNumber ?? ""}`);
       } else {
@@ -54,7 +64,10 @@ export default function EnquiryFormSimple({ propertyTitle = "", propertyRef = ""
       }
     } catch (error) {
       console.error("Error sending enquiry:", error);
-      alert(error?.response?.data?.message || "Server error. Please try again later.");
+      alert(
+        error?.response?.data?.message ||
+          "Server error. Please try again later."
+      );
     } finally {
       setBusy(false);
     }
@@ -74,10 +87,14 @@ export default function EnquiryFormSimple({ propertyTitle = "", propertyRef = ""
             value={formData.name}
             onChange={handleChange}
             placeholder="Enter your name"
-            className={`w-full border ${errors.name ? "border-red-500" : "border-gray-300"} rounded-md px-4 py-3 focus:outline-none`}
+            className={`w-full border ${
+              errors.name ? "border-red-500" : "border-gray-300"
+            } rounded-md px-4 py-3 focus:outline-none`}
             required
           />
-          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+          {errors.name && (
+            <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+          )}
         </div>
 
         {/* Email */}
@@ -91,21 +108,29 @@ export default function EnquiryFormSimple({ propertyTitle = "", propertyRef = ""
             value={formData.email}
             onChange={handleChange}
             placeholder="Enter your email"
-            className={`w-full border ${errors.email ? "border-red-500" : "border-gray-300"} rounded-md px-4 py-3 focus:outline-none`}
+            className={`w-full border ${
+              errors.email ? "border-red-500" : "border-gray-300"
+            } rounded-md px-4 py-3 focus:outline-none`}
             required
           />
-          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+          {errors.email && (
+            <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+          )}
         </div>
 
         {/* What do you wish */}
         <div>
-          <label className="block text-xs font-semibold uppercase mb-2 text-gray-700">What do you wish? *</label>
+          <label className="block text-xs font-semibold uppercase mb-2 text-gray-700">
+            What do you wish? *
+          </label>
           <div className="relative">
             <select
               name="wish"
               value={formData.wish}
               onChange={handleChange}
-              className={`w-full appearance-none border ${errors.wish ? "border-red-500" : "border-gray-300"} rounded-md px-4 py-3 pr-10 focus:outline-none text-gray-700`}
+              className={`w-full appearance-none border ${
+                errors.wish ? "border-red-500" : "border-gray-300"
+              } rounded-md px-4 py-3 pr-10 focus:outline-none text-gray-700`}
               required
             >
               <option value="" disabled className="text-gray-400">
@@ -118,11 +143,22 @@ export default function EnquiryFormSimple({ propertyTitle = "", propertyRef = ""
             </select>
 
             {/* Dropdown icon */}
-            <svg className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <svg
+              className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500"
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </div>
-          {errors.wish && <p className="text-red-500 text-xs mt-1">{errors.wish}</p>}
+          {errors.wish && (
+            <p className="text-red-500 text-xs mt-1">{errors.wish}</p>
+          )}
         </div>
 
         {/* Meeting Type - Radio Buttons */}
@@ -159,21 +195,29 @@ export default function EnquiryFormSimple({ propertyTitle = "", propertyRef = ""
             </label>
           </div>
 
-          {errors.meeting && <p className="text-red-500 text-xs mt-1">{errors.meeting}</p>}
+          {errors.meeting && (
+            <p className="text-red-500 text-xs mt-1">{errors.meeting}</p>
+          )}
         </div>
 
         {/* Message */}
         <div>
-          <label className="block text-xs font-semibold uppercase mb-2 text-gray-700">Message *</label>
+          <label className="block text-xs font-semibold uppercase mb-2 text-gray-700">
+            Message *
+          </label>
           <textarea
             name="message"
             value={formData.message}
             onChange={handleChange}
             placeholder="Your message..."
-            className={`w-full h-36 border ${errors.message ? "border-red-500" : "border-gray-300"} rounded-md px-4 py-3 focus:outline-none resize-none`}
+            className={`w-full h-36 border ${
+              errors.message ? "border-red-500" : "border-gray-300"
+            } rounded-md px-4 py-3 focus:outline-none resize-none`}
             required
           />
-          {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
+          {errors.message && (
+            <p className="text-red-500 text-xs mt-1">{errors.message}</p>
+          )}
         </div>
 
         {/* Submit */}
@@ -185,7 +229,9 @@ export default function EnquiryFormSimple({ propertyTitle = "", propertyRef = ""
           {busy ? "Sending…" : "Get in Touch"}
         </button>
 
-        {status && <p className="text-sm mt-2 text-gray-700 text-center">{status}</p>}
+        {status && (
+          <p className="text-sm mt-2 text-gray-700 text-center">{status}</p>
+        )}
       </form>
     </div>
   );

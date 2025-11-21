@@ -1,17 +1,55 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import FilterForm from "../components/FilterForm";
 import PropertyList from "../components/PropertyList";
 import InfoSection from "../components/InfoSection";
 import Enquiry from "../components/Enquiry";
-
-import properties from "../data/properties";
+import API from "../services/api";
+import CategoryGrid from "../components/CategoryGrid";
 
 const Buy = () => {
-  const [filteredProperties, setFilteredProperties] = useState(properties);
-  const propertyListRef = useRef(null); // 👈 Step 1: Create a ref
+  const [allProperties, setAllProperties] = useState([]);
+  const [filteredProperties, setFilteredProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [categoryCounts, setCategoryCounts] = useState({});
+  const propertyListRef = useRef(null);
+
+  // helper to slugify type from backend
+  const slugifyType = (type = "") =>
+    type.toLowerCase().replace(/\s+/g, "-");
+
+  // Fetch properties from backend on mount
+  useEffect(() => {
+    const fetchProps = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const res = await API.get("/properties");
+        const data = res.data || [];
+        setAllProperties(data);
+        setFilteredProperties(data);
+
+        // build category counts here (once)
+        const map = {};
+        data.forEach((p) => {
+          if (!p.type) return;
+          const slug = slugifyType(p.type);
+          if (!slug) return;
+          map[slug] = (map[slug] || 0) + 1;
+        });
+        setCategoryCounts(map);
+      } catch (err) {
+        console.error("Fetch properties error:", err);
+        setError(err?.response?.data?.message || "Failed to load properties");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProps();
+  }, []);
 
   const handleFilter = (filters) => {
-    // ✅ Empty submit → reset all properties
+    // If no filters -> reset
     if (
       !filters.city &&
       !filters.type &&
@@ -24,33 +62,55 @@ const Buy = () => {
       !filters.newItem &&
       (!filters.amenities || filters.amenities.length === 0)
     ) {
-      setFilteredProperties(properties);
+      setFilteredProperties(allProperties);
       return;
     }
 
-    // ✅ Filtering logic
-    const filtered = properties.filter((property) => {
-      const matchesCity =
-        !filters.city ||
-        property.city.toLowerCase().includes(filters.city.toLowerCase());
+    const filtered = allProperties.filter((property) => {
+      const price = property.totalPrice ?? property.price ?? 0;
+      const size = property.squareMeters ?? property.size ?? 0;
+
+      // 🔍 City / place / pincode search
+      const searchCity = (filters.city || "").toLowerCase();
+      const locationString = (
+        (property.city || "") +
+        " " +
+        (property.place || "") +
+        " " +
+        (property.postalCode ||
+          property.zipCode ||
+          property.zip ||
+          property.pincode ||
+          "")
+      )
+        .toString()
+        .toLowerCase();
+
+      const matchesCity = !searchCity || locationString.includes(searchCity);
+
       const matchesType =
         !filters.type ||
-        property.type.toLowerCase() === filters.type.toLowerCase();
+        (property.type || "").toLowerCase() ===
+          filters.type.toLowerCase();
       const matchesMinPrice =
-        !filters.minBudget || property.price >= Number(filters.minBudget);
+        !filters.minBudget || price >= Number(filters.minBudget);
       const matchesMaxPrice =
-        !filters.maxBudget || property.price <= Number(filters.maxBudget);
+        !filters.maxBudget || price <= Number(filters.maxBudget);
       const matchesMinSqm =
-        !filters.minSqm || property.size >= Number(filters.minSqm);
+        !filters.minSqm || size >= Number(filters.minSqm);
       const matchesMaxSqm =
-        !filters.maxSqm || property.size <= Number(filters.maxSqm);
+        !filters.maxSqm || size <= Number(filters.maxSqm);
       const matchesMinRooms =
-        !filters.minRooms || property.rooms >= Number(filters.minRooms);
+        !filters.minRooms ||
+        (property.rooms ?? 0) >= Number(filters.minRooms);
       const matchesMaxRooms =
-        !filters.maxRooms || property.rooms <= Number(filters.maxRooms);
+        !filters.maxRooms ||
+        (property.rooms ?? 0) <= Number(filters.maxRooms);
       const matchesAmenities =
-        !filters.amenities.length ||
-        filters.amenities.every((a) => property.amenities.includes(a));
+        !filters.amenities?.length ||
+        filters.amenities.every((a) =>
+          (property.amenities || []).includes(a)
+        );
 
       return (
         matchesCity &&
@@ -67,9 +127,12 @@ const Buy = () => {
 
     setFilteredProperties(filtered);
 
-    // 👇 Step 3: Scroll down to property list
+    // Scroll to list
     setTimeout(() => {
-      propertyListRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      propertyListRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }, 100);
   };
 
@@ -100,9 +163,24 @@ const Buy = () => {
         </div>
       </section>
 
+      {/* 🔹 Category Grid (uses counts from this page) */}
+      <CategoryGrid countsBySlug={categoryCounts} loading={loading} />
+
       {/* 🏘️ Property List */}
-      <div ref={propertyListRef} className="px-4 md:px-12 lg:px-24 xl:px-32 py-12">
-        <PropertyList properties={filteredProperties} />
+      <div
+        ref={propertyListRef}
+        className="px-4 md:px-12 lg:px-24 xl:px-32 py-12"
+      >
+        {loading ? (
+          <p>Loading properties…</p>
+        ) : error ? (
+          <p className="text-red-600">{error}</p>
+        ) : (
+          <PropertyList
+            properties={filteredProperties}
+            totalCount={allProperties.length}
+          />
+        )}
       </div>
 
       <div className="px-4 md:px-12 lg:px-24 xl:px-32 py-12">

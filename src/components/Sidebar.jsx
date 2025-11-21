@@ -112,7 +112,7 @@ export default function Sidebar({ items = [], logo = null, rightAction = null })
           </nav>
 
           <div className="px-4 py-4 border-t mt-auto">
-            <p className="text-xs text-gray-500">© {new Date().getFullYear()} Your Company</p>
+            <p className="text-xs text-gray-500">© {new Date().getFullYear()} Cleverso</p>
           </div>
         </div>
       </aside>

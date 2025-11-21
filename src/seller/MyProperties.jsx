@@ -116,11 +116,18 @@ export default function MyProperties() {
       {properties.length === 0 ? (
         <div className="text-gray-500">You have no properties yet.</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {properties.map((p) => {
             const id = p._id || p.id;
             const img = p.images?.[0] || "";
             const price = p.totalPrice ?? p.price ?? null;
+
+            const displayId =
+              p.refNumber || `PROP-${String(p.id || "").padStart(3, "0") || id}`;
+
+            // For seller dashboard, just show "You" or their name if populated
+            const uploaderName = p.seller?.name || "You";
+
             return (
               <div key={id} className="bg-white p-4 rounded shadow flex flex-col">
                 <div className="w-full h-40 mb-3 bg-gray-100 rounded overflow-hidden">
@@ -138,6 +145,15 @@ export default function MyProperties() {
                   <p className="text-sm text-gray-600">
                     {p.city || p.place || "-"}, {p.country || "-"}
                   </p>
+
+                  {/* ID + uploader info */}
+                  <p className="text-xs text-gray-500 mt-1">
+                    ID: <span className="font-mono">{displayId}</span>
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Uploaded by: <span className="font-semibold">{uploaderName}</span>
+                  </p>
+
                   <p className="mt-2 font-semibold">
                     {price !== null ? `CHF ${Number(price).toLocaleString()}` : "-"}
                   </p>

@@ -371,8 +371,8 @@ export default function ManageSellers() {
 
   /* ---------- RENDER ---------- */
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 md:p-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div>
           <h2 className="text-2xl font-semibold">{showDeleted ? "Deleted Sellers" : "All Sellers"}</h2>
           <div className="text-sm text-gray-500">
@@ -382,13 +382,13 @@ export default function ManageSellers() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-start md:justify-end gap-2 md:gap-3">
           <button
             onClick={() => {
               setShowCreate((s) => !s);
               setCreateErr("");
             }}
-            className="px-4 py-2 bg-black text-white rounded hover:bg-gray-900 transition"
+            className="px-4 py-2 bg-black text-white rounded hover:bg-gray-900 transition text-sm md:text-base"
           >
             {showCreate ? "Cancel" : "Create Seller"}
           </button>
@@ -466,17 +466,17 @@ export default function ManageSellers() {
               type="password"
               className="border p-2 rounded"
             />
-            <label className="flex items-center gap-2">
+            <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
                 checked={createForm.isActive}
                 onChange={(e) => setCreateForm((f) => ({ ...f, isActive: e.target.checked }))}
               />
-              <span className="text-sm">Active</span>
+              <span>Active</span>
             </label>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button disabled={busyCreate} className="px-4 py-2 bg-green-600 text-white rounded">
               {busyCreate ? "Creating..." : "Create Seller"}
             </button>
@@ -501,17 +501,17 @@ export default function ManageSellers() {
           <div className="text-gray-500">{showDeleted ? "No deleted sellers." : "No sellers yet."}</div>
         ) : (
           sellers.map((s) => (
-            <div key={s._id} className="p-4 bg-white rounded-lg shadow flex gap-4">
+            <div key={s._id} className="p-4 bg-white rounded-lg shadow flex flex-col sm:flex-row gap-4">
               <div className="flex-shrink-0">
                 <Avatar name={s.name} />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                   <div>
                     <div className="text-base font-semibold text-gray-900">{s.name}</div>
-                    <div className="text-sm text-gray-600">{s.email}</div>
+                    <div className="text-sm text-gray-600 break-all">{s.email}</div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-left sm:text-right">
                     <div
                       className={`inline-flex items-center px-2 py-1 text-sm rounded ${
                         s.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
@@ -525,13 +525,13 @@ export default function ManageSellers() {
                   </div>
                 </div>
 
-                <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                  <div className="flex items-center">
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                  <div className="flex items-center min-w-[140px]">
                     <PhoneSVG className="w-5 h-5 inline-block mr-2 text-gray-500" />
                     <span className="truncate">{s.phone || "—"}</span>
                   </div>
 
-                  <div className="flex items-center">
+                  <div className="flex items-center min-w-[160px]">
                     <LocationSVG className="w-5 h-5 inline-block mr-2 text-gray-500" />
                     <span className="truncate">
                       {s.city || "—"}
@@ -542,7 +542,7 @@ export default function ManageSellers() {
                   {s.company && (
                     <div className="flex items-center text-sm text-gray-500">
                       <span className="italic">Company:</span>&nbsp;
-                      <span className="text-gray-700 ml-1">{s.company}</span>
+                      <span className="text-gray-700 ml-1 break-words">{s.company}</span>
                     </div>
                   )}
                 </div>
@@ -659,14 +659,14 @@ export default function ManageSellers() {
                 placeholder="Pincode"
                 className="border p-2 rounded"
               />
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-2 text-sm">
                 <input
                   name="isActive"
                   type="checkbox"
                   checked={!!editSeller.isActive}
                   onChange={(e) => setEditSeller((s) => ({ ...s, isActive: e.target.checked }))}
                 />
-                <span className="text-sm">Active</span>
+                <span>Active</span>
               </label>
             </div>
 
@@ -690,7 +690,7 @@ export default function ManageSellers() {
               />
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <button disabled={busyEdit} className="px-4 py-2 bg-blue-600 text-white rounded">
                 {busyEdit ? "Saving..." : "Save changes"}
               </button>
@@ -728,7 +728,7 @@ export default function ManageSellers() {
                   {propsForSeller.map((p) => (
                     <div
                       key={p._id}
-                      className="p-3 bg-gray-50 rounded flex items-start justify-between gap-3"
+                      className="p-3 bg-gray-50 rounded flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
                     >
                       <div className="min-w-0">
                         <div className="font-medium truncate">{p.title || p._id}</div>
@@ -740,7 +740,7 @@ export default function ManageSellers() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         {p.status !== "inactive" ? (
                           <button
                             disabled={propsBusyIds.includes(p._id)}
@@ -801,7 +801,7 @@ export default function ManageSellers() {
 
           {/* bulk actions */}
           {activeSellerForProps && (
-            <div className="mt-3 flex items-center gap-2">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               <button
                 onClick={() => softDeleteAllPropertiesForSeller(activeSellerForProps._id)}
                 className="px-3 py-1 text-sm border rounded text-red-600"
@@ -814,7 +814,7 @@ export default function ManageSellers() {
               >
                 Restore all
               </button>
-              <div className="text-sm text-gray-500 ml-3">
+              <div className="text-sm text-gray-500 ml-0 sm:ml-3">
                 Bulk operations on this seller&apos;s properties.
               </div>
             </div>
@@ -855,7 +855,7 @@ export default function ManageSellers() {
             </>
           )}
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               disabled={busyDelete}
               onClick={confirmDelete}
